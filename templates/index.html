@@ -54,25 +54,37 @@
             progress.style.width = "0%";
             status.textContent = "Procesando...";
 
-            const response = await fetch("/convert", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ youtube_url: youtubeUrl }),
-            });
+            // Simular progreso en el frontend
+            const interval = setInterval(() => {
+                const width = parseInt(progress.style.width) || 0;
+                if (width < 90) {
+                    progress.style.width = `${width + 10}%`;
+                }
+            }, 500);
 
-            if (!response.ok) {
-                const error = await response.json();
-                status.textContent = `Error: ${error.error}`;
-                return;
-            }
+            try {
+                const response = await fetch("/convert", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ youtube_url: youtubeUrl }),
+                });
 
-            const result = await response.json();
-
-            if (result.download_url) {
+                clearInterval(interval);
                 progress.style.width = "100%";
-                status.innerHTML = `Completado. <a href="${result.download_url}">Descargar MP3</a>`;
-            } else {
-                status.textContent = "Ocurrió un error.";
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    status.textContent = `Error: ${error.error}`;
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.download_url) {
+                    status.innerHTML = `Completado. <a href="${result.download_url}">Descargar MP3</a>`;
+                }
+            } catch (error) {
+                clearInterval(interval);
+                status.textContent = `Error inesperado: ${error.message}`;
             }
         });
     </script>
