@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube a MP3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .progress {
+            height: 20px;
+            width: 0;
+            background-color: #76c7c0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Convertidor de YouTube a MP3</h1>
+    <form id="convertForm">
+        <input type="text" id="youtube_url" placeholder="Enlace de YouTube" required>
+        <button type="submit">Convertir</button>
+    </form>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+        const form = document.getElementById("convertForm");
+        const progress = document.getElementById("progress");
+        const status = document.getElementById("status");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const youtubeUrl = document.getElementById("youtube_url").value;
+
+            if (!youtubeUrl) {
+                alert("Por favor, ingresa un enlace válido.");
+                return;
+            }
+
+            progress.style.width = "0%";
+            status.textContent = "Procesando...";
+
+            const response = await fetch("/convert", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ youtube_url: youtubeUrl }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                status.textContent = `Error: ${error.error}`;
+                return;
+            }
+
+            const result = await response.json();
+
+            if (result.download_url) {
+                progress.style.width = "100%";
+                status.innerHTML = `Completado. <a href="${result.download_url}">Descargar MP3</a>`;
+            } else {
+                status.textContent = "Ocurrió un error.";
+            }
+        });
+    </script>
+</body>
+</html>
