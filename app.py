@@ -3,7 +3,6 @@ from pytube import YouTube
 from pydub import AudioSegment
 import os
 import uuid
-import time
 
 app = Flask(__name__)
 
@@ -27,11 +26,6 @@ def convert():
         yt = YouTube(youtube_url)
         audio_stream = yt.streams.filter(only_audio=True).first()
         temp_audio_path = audio_stream.download(output_path=DOWNLOAD_FOLDER)
-
-        # Simular progreso (puedes ajustar según el tiempo real)
-        for i in range(1, 6):
-            time.sleep(0.5)  # Simula el tiempo de procesamiento
-            yield f"data: {i * 20}\n\n"
 
         # Convertir a formato MP3
         mp3_filename = f"{uuid.uuid4()}.mp3"
